@@ -18,6 +18,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private Pyramid pyramid;
     private Cylinder cylinder;
 
+    private boolean touchingSeekBar = false;
+    private int MAX_TIME = 60; // 1sec
+    private int timeToAutoRotation = MAX_TIME;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,9 +29,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         setContentView(R.layout.activity_main);
 
         glView = findViewById(R.id.gl_view);
-        SeekBar seekBarX = findViewById(R.id.seekbar_x);
-        SeekBar seekBarY = findViewById(R.id.seekbar_y);
-        SeekBar seekBarZ = findViewById(R.id.seekbar_z);
+        final SeekBar seekBarX = findViewById(R.id.seekbar_x);
+        final SeekBar seekBarY = findViewById(R.id.seekbar_y);
+        final SeekBar seekBarZ = findViewById(R.id.seekbar_z);
         seekBarX.setMax(360);
         seekBarY.setMax(360);
         seekBarZ.setMax(360);
@@ -35,7 +39,32 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         seekBarY.setOnSeekBarChangeListener(this);
         seekBarZ.setOnSeekBarChangeListener(this);
 
-        renderer = new SimpleRenderer();
+        renderer = new SimpleRenderer(new Runnable(){
+            public void run(){
+                if (!touchingSeekBar) {
+                    timeToAutoRotation--;
+                }
+                if (timeToAutoRotation <= 0) {
+                    int newProgressX = seekBarX.getProgress() + 1;
+                    if (newProgressX > seekBarX.getMax()) {
+                        newProgressX = 0;
+                    }
+                    seekBarX.setProgress(newProgressX);
+
+                    int newProgressY = seekBarY.getProgress() + 2;
+                    if (newProgressY > seekBarY.getMax()) {
+                        newProgressY = 0;
+                    }
+                    seekBarY.setProgress(newProgressY);
+
+                    int newProgressZ = seekBarZ.getProgress() + 3;
+                    if (newProgressZ > seekBarZ.getMax()) {
+                        newProgressZ = 0;
+                    }
+                    seekBarZ.setProgress(newProgressZ);
+                }
+            }
+        });
         cube = new Cube();
         pyramid = new Pyramid();
         cylinder = new Cylinder(1, 2, 8);
@@ -98,9 +127,12 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
+        timeToAutoRotation = MAX_TIME;
+        touchingSeekBar = true;
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
+        touchingSeekBar = false;
     }
 }

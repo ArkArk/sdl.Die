@@ -14,7 +14,13 @@ public class SimpleRenderer implements GLSurfaceView.Renderer {
     private float x, y, z;     // object position
     private float rx, ry, rz;  // object rotation
 
-    SimpleRenderer() {}
+    private int timeToAutoRotation = 0;
+
+    private final Runnable drawCallback;
+
+    SimpleRenderer(Runnable drawCallback) {
+        this.drawCallback = drawCallback;
+    }
 
     void setObj(Obj obj, float x, float y, float z) {
         this.obj = obj;
@@ -25,6 +31,7 @@ public class SimpleRenderer implements GLSurfaceView.Renderer {
 
     void setObj(Obj obj) {
         setObj(obj, 0, 0, 0);
+        timeToAutoRotation = 60;
     }
 
     @Override
@@ -48,6 +55,8 @@ public class SimpleRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl) {
+        drawCallback.run();
+
         gl.glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 
